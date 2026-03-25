@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.whl
+
+# Virtual environments
+venv/
+.venv/
+env/
+.env
+
+# Environment variables (keep .env.example)
+.env
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# IDE / editors
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+*.xml
+
+# Logs
+*.log
+logs/
+
+# Docker
+*.env.docker
