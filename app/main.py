@@ -5,7 +5,9 @@ from fastapi import FastAPI
 
 from app.api.v1.routes import router as address_router
 from app.core.config import settings
+from app.core.exceptions import register_exception_handlers
 from app.core.logging import setup_logging
+from app.core.middleware import RequestLoggingMiddleware
 from app.db.base import Base
 from app.db.session import engine
 
@@ -31,7 +33,9 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.add_middleware(RequestLoggingMiddleware)
 app.include_router(address_router)
+register_exception_handlers(app)
 
 
 @app.get("/health")
