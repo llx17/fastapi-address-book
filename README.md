@@ -13,28 +13,31 @@ A minimal FastAPI-based address book application that allows API users to create
 - Search for addresses within a given distance
 - Validate latitude and longitude inputs
 - Store data in SQLite using SQLAlchemy ORM
-- Built-in interactive Swagger documentation
 - Request logging middleware
 - Structured exception handling
 - API tests using pytest
+- Docker support for easy setup and execution
 
 ---
 
 ## Tech Stack
 
-- Python 3.13
-- FastAPI
-- SQLAlchemy
-- SQLite
-- Pydantic
-- Haversine
-- Pytest
+| Layer | Technology |
+|---|---|
+| Language | Python 3.13 |
+| Framework | FastAPI |
+| ORM | SQLAlchemy |
+| Database | SQLite |
+| Validation | Pydantic |
+| Distance | Haversine |
+| Testing | Pytest |
+| Deployment | Docker |
 
 ---
 
 ## Project Structure
 
-```text
+```
 app/
 ├── api/         # Route handlers
 ├── core/        # Config, logging, middleware, exceptions
@@ -51,68 +54,101 @@ tests/           # API tests
 
 ## Setup Instructions
 
-### 1. Clone the repository
+You can run the application in two ways:
+
+- **Local** (Python)
+- **Docker** (recommended for reviewers)
+
+---
+
+### Option 1: Run Locally (Python)
+
+#### 1. Clone the repository
 
 ```bash
-git clone <your-repo-url>
+git clone
 cd fastapi-address-book
 ```
 
-### 2. Create and activate virtual environment
+#### 2. Create and activate virtual environment
 
-#### Windows PowerShell
+**Windows PowerShell**
 ```powershell
 python -m venv venv
 venv\Scripts\Activate.ps1
 ```
 
-#### Windows CMD
+**Windows CMD**
 ```cmd
 python -m venv venv
 venv\Scripts\activate
 ```
 
-#### Mac/Linux
+**Mac/Linux**
 ```bash
 python3 -m venv venv
 source venv/bin/activate
 ```
 
-### 3. Install dependencies
+#### 3. Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Create environment file
+#### 4. Create environment file
 
-Create a `.env` file in the project root with:
+Create a `.env` file in the project root:
 
 ```env
 APP_NAME=Address Book API
 APP_VERSION=1.0.0
 DATABASE_URL=sqlite:///./address_book.db
 DEBUG=True
+
 ```
 
-### 5. Run the application
+#### 5. Run the application
 
 ```bash
 uvicorn app.main:app --reload
 ```
 
-### 6. Open API docs
+### Option 2: Run with Docker (Recommended)
 
-Swagger UI:
+#### 1. Build Docker image
 
-```text
-http://127.0.0.1:8000/docs
+```bash
+docker build -t fastapi-address-book .
 ```
 
-ReDoc:
+#### 2. Run container
 
-```text
-http://127.0.0.1:8000/redoc
+**Windows PowerShell**
+```powershell
+docker run --name fastapi-address-book -p 8000:8000 --env-file .env -v ${PWD}:/app fastapi-address-book
+```
+
+**Windows CMD**
+```cmd
+docker run --name fastapi-address-book -p 8000:8000 --env-file .env -v %cd%:/app fastapi-address-book
+```
+
+**Mac/Linux**
+```bash
+docker run --name fastapi-address-book -p 8000:8000 --env-file .env -v $(pwd):/app fastapi-address-book
+```
+
+#### 3. Stop container
+
+```bash
+docker stop fastapi-address-book
+```
+
+#### 4. Remove container
+
+```bash
+docker rm -f fastapi-address-book
 ```
 
 ---
@@ -128,26 +164,36 @@ pytest
 ## API Endpoints
 
 ### Health Check
-- `GET /health`
+
+| Method | Endpoint |
+|---|---|
+| GET | `/health` |
 
 ### Address CRUD
-- `POST /addresses`
-- `GET /addresses/{address_id}`
-- `PUT /addresses/{address_id}`
-- `DELETE /addresses/{address_id}`
+
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/addresses` | Create a new address |
+| GET | `/addresses/{address_id}` | Retrieve an address by ID |
+| PUT | `/addresses/{address_id}` | Update an existing address |
+| DELETE | `/addresses/{address_id}` | Delete an address |
 
 ### Nearby Search
-- `GET /addresses/nearby?latitude=...&longitude=...&distance_km=...`
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/addresses/nearby` | Find addresses within a given distance |
+
+Query parameters: `latitude`, `longitude`, `distance_km`
 
 ---
 
-## Example Request
+## Example Requests
 
 ### Create Address
 
-**POST** `/addresses`
-
 ```json
+POST /addresses
 {
   "name": "Home",
   "latitude": 10.8505,
@@ -155,17 +201,20 @@ pytest
 }
 ```
 
-### Nearby Search Example
+### Nearby Search
 
-**GET** `/addresses/nearby?latitude=9.9312&longitude=76.2673&distance_km=100`
+```
+GET /addresses/nearby?latitude=9.9312&longitude=76.2673&distance_km=100
+```
 
 ---
 
 ## Notes
 
 - Coordinates are validated at the API boundary using Pydantic.
-- Nearby search is calculated in Python using the `haversine` library.
-- SQLite is used for simplicity and portability for this assignment.
-- Since SQLite does not provide advanced geospatial querying out of the box, nearby filtering is performed in the service layer.
+- Nearby search distance is calculated using the `haversine` library.
+- SQLite is used for simplicity and portability.
+- Since SQLite does not support advanced geospatial queries, distance filtering is handled in the service layer.
+- Docker support is included for consistent execution across environments.
 
 ---
