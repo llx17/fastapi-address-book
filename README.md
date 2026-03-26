@@ -66,7 +66,7 @@ You can run the application in two ways:
 #### 1. Clone the repository
 
 ```bash
-git clone
+git clone https://github.com/llx17/fastapi-address-book
 cd fastapi-address-book
 ```
 
@@ -175,7 +175,7 @@ pytest
 |---|---|---|
 | POST | `/addresses` | Create a new address |
 | GET | `/addresses/{address_id}` | Retrieve an address by ID |
-| PUT | `/addresses/{address_id}` | Update an existing address |
+| PATCH | `/addresses/{address_id}` | Update an existing address |
 | DELETE | `/addresses/{address_id}` | Delete an address |
 
 ### Nearby Search

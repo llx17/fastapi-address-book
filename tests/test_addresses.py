@@ -58,7 +58,7 @@ def test_update_address(client):
         "name": "New Name"
     }
 
-    response = client.put(f"/addresses/{address_id}", json=update_payload)
+    response = client.patch(f"/addresses/{address_id}", json=update_payload)
 
     assert response.status_code == 200
     data = response.json()

@@ -80,7 +80,7 @@ def get_address(
     return address
 
 
-@router.put(
+@router.patch(
     "/{address_id}",
     response_model=AddressResponse,
     summary="Update an existing address",
@@ -90,7 +90,7 @@ def update_address(
     payload: AddressUpdate,
     db: Session = Depends(get_db),
 ) -> AddressResponse:
-    logger.info("PUT /addresses/%s called", address_id)
+    logger.info("PATCH /addresses/%s called", address_id)
 
     address = AddressService.get_address_by_id(db=db, address_id=address_id)
     if not address:
