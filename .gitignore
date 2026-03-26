@@ -43,3 +43,6 @@ logs/
 
 # Docker
 *.env.docker
+
+test_address_book.db
+address_book.db
