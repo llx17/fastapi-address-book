@@ -1,4 +1,5 @@
 import logging
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
@@ -7,24 +8,27 @@ from app.core.logging import setup_logging
 from app.db.base import Base
 from app.db.session import engine
 
-# IMPORTANT: import model so SQLAlchemy sees it before create_all()
-from app.models.address import Address  # noqa: F401
+from app.models.address import Address
 
 setup_logging()
 logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logger.info("Starting application...")
+    Base.metadata.create_all(bind=engine)
+    logger.info("Database tables created/verified successfully.")
+    yield
+    logger.info("Shutting down application...")
+
 
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION,
     description="A minimal FastAPI address book application.",
+    lifespan=lifespan,
 )
-
-
-@app.on_event("startup")
-def on_startup() -> None:
-    logger.info("Starting application...")
-    Base.metadata.create_all(bind=engine)
-    logger.info("Database tables created/verified successfully.")
 
 
 @app.get("/health")
