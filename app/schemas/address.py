@@ -82,3 +82,7 @@ class AddressResponse(BaseModel):
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class NearbyAddressResponse(AddressResponse):
+    distance_km: float

@@ -1,3 +1,13 @@
-from app.schemas.address import AddressCreate, AddressResponse, AddressUpdate
+from app.schemas.address import (
+    AddressCreate,
+    AddressResponse,
+    AddressUpdate,
+    NearbyAddressResponse,
+)
 
-__all__ = ["AddressCreate", "AddressUpdate", "AddressResponse"]
+__all__ = [
+    "AddressCreate",
+    "AddressUpdate",
+    "AddressResponse",
+    "NearbyAddressResponse",
+]
