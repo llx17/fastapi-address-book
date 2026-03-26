@@ -6,6 +6,7 @@ A minimal FastAPI-based address book application that allows API users to create
 
 ## Features
 
+- Secure API endpoints with JSON Web Tokens
 - Create an address
 - Retrieve an address by ID
 - Update an existing address
@@ -30,6 +31,7 @@ A minimal FastAPI-based address book application that allows API users to create
 | Database | SQLite |
 | Validation | Pydantic |
 | Distance | Haversine |
+| Authentication | JWT (PyJWT) |
 | Testing | Pytest |
 | Deployment | Docker |
 
@@ -106,6 +108,12 @@ APP_VERSION=1.0.0
 DATABASE_URL=sqlite:///./address_book.db
 DEBUG=True
 
+JWT_SECRET_KEY=your-super-secret-key-change-this-in-production
+JWT_ALGORITHM=HS256
+JWT_EXPIRATION_HOURS=24
+
+DEMO_USERNAME=demo
+DEMO_PASSWORD=demo123
 ```
 
 #### 5. Run the application
@@ -163,25 +171,23 @@ pytest
 
 ## API Endpoints
 
+### Authentication
+
+| POST | `/auth/login` | Login with username/password to get JWT token |
+
 ### Health Check
 
-| Method | Endpoint |
-|---|---|
-| GET | `/health` |
+| GET | `/health` | Health check |
 
 ### Address CRUD
 
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | `/addresses` | Create a new address |
+| POST | `/addresses` | Create a new address | 
 | GET | `/addresses/{address_id}` | Retrieve an address by ID |
 | PATCH | `/addresses/{address_id}` | Update an existing address |
 | DELETE | `/addresses/{address_id}` | Delete an address |
 
 ### Nearby Search
 
-| Method | Endpoint | Description |
-|---|---|---|
 | GET | `/addresses/nearby` | Find addresses within a given distance |
 
 Query parameters: `latitude`, `longitude`, `distance_km`
@@ -190,10 +196,36 @@ Query parameters: `latitude`, `longitude`, `distance_km`
 
 ## Example Requests
 
+### Login (Get JWT Token)
+
+```bash
+POST /auth/login
+Content-Type: application/json
+
+{
+  "username": "demo",
+  "password": "demo123"
+}
+```
+
+**Response:**
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "bearer",
+  "expires_in": 86400
+}
+```
+
 ### Create Address
 
-```json
+With JWT token in Authorization header:
+
+```bash
 POST /addresses
+Authorization: Bearer {access_token}
+Content-Type: application/json
+
 {
   "name": "Home",
   "latitude": 10.8505,
@@ -201,20 +233,45 @@ POST /addresses
 }
 ```
 
+### Using curl with Bearer Token
+
+```bash
+curl -X GET "http://localhost:8000/addresses/nearby?latitude=10.0&longitude=76.0&distance_km=100" \
+  -H "Authorization: Bearer {access_token}"
+```
+
 ### Nearby Search
 
-```
+```json
 GET /addresses/nearby?latitude=9.9312&longitude=76.2673&distance_km=100
+Authorization: Bearer {access_token}
 ```
+
+---
+
+## Authentication
+
+All address endpoints require JWT authentication. Here's the authentication flow:
+
+1. **Login** - POST `/auth/login` with demo username and password
+2. **Get Token** - Receive JWT access token with 24-hour expiration
+3. **Use Token** - Include token in `Authorization: Bearer {token}` header for protected endpoints
+4. **Token Expires** - When token expires, login again to get a new token
+
+### Demo Credentials
+- **Username:** `demo`
+- **Password:** `demo123`
 
 ---
 
 ## Notes
 
+- All address endpoints are protected with JWT authentication. Use the `/auth/login` endpoint to obtain a token.
 - Coordinates are validated at the API boundary using Pydantic.
 - Nearby search distance is calculated using the `haversine` library.
 - SQLite is used for simplicity and portability.
 - Since SQLite does not support advanced geospatial queries, distance filtering is handled in the service layer.
 - Docker support is included for consistent execution across environments.
+- JWT tokens expire after 24 hours (configurable via `JWT_EXPIRATION_HOURS`).
 
 ---

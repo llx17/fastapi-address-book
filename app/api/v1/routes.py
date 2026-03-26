@@ -4,6 +4,7 @@ from collections.abc import Sequence
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy.orm import Session
 
+from app.core.auth import get_current_user
 from app.db.session import get_db
 from app.schemas.address import (
     AddressCreate,
@@ -27,8 +28,9 @@ router = APIRouter(prefix="/addresses", tags=["Addresses"])
 def create_address(
     payload: AddressCreate,
     db: Session = Depends(get_db),
+    current_user: str = Depends(get_current_user),
 ) -> AddressResponse:
-    logger.info("POST /addresses called")
+    logger.info("POST /addresses called by user: %s", current_user)
     address = AddressService.create_address(db=db, payload=payload)
     return address
 
@@ -43,9 +45,11 @@ def get_nearby_addresses(
     longitude: float = Query(..., ge=-180, le=180, description="Reference longitude"),
     distance_km: float = Query(..., gt=0, description="Maximum distance in kilometers"),
     db: Session = Depends(get_db),
+    current_user: str = Depends(get_current_user),
 ) -> Sequence[NearbyAddressResponse]:
     logger.info(
-        "GET /addresses/nearby called with lat=%s lon=%s distance=%s",
+        "GET /addresses/nearby called by user: %s with lat=%s lon=%s distance=%s",
+        current_user,
         latitude,
         longitude,
         distance_km,
@@ -67,8 +71,9 @@ def get_nearby_addresses(
 def get_address(
     address_id: int,
     db: Session = Depends(get_db),
+    current_user: str = Depends(get_current_user),
 ) -> AddressResponse:
-    logger.info("GET /addresses/%s called", address_id)
+    logger.info("GET /addresses/%s called by user: %s", address_id, current_user)
 
     address = AddressService.get_address_by_id(db=db, address_id=address_id)
     if not address:
@@ -89,8 +94,9 @@ def update_address(
     address_id: int,
     payload: AddressUpdate,
     db: Session = Depends(get_db),
+    current_user: str = Depends(get_current_user),
 ) -> AddressResponse:
-    logger.info("PATCH /addresses/%s called", address_id)
+    logger.info("PATCH /addresses/%s called by user: %s", address_id, current_user)
 
     address = AddressService.get_address_by_id(db=db, address_id=address_id)
     if not address:
@@ -115,8 +121,9 @@ def update_address(
 def delete_address(
     address_id: int,
     db: Session = Depends(get_db),
+    current_user: str = Depends(get_current_user),
 ) -> Response:
-    logger.info("DELETE /addresses/%s called", address_id)
+    logger.info("DELETE /addresses/%s called by user: %s", address_id, current_user)
 
     address = AddressService.get_address_by_id(db=db, address_id=address_id)
     if not address:

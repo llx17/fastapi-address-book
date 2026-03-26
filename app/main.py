@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.api.v1.routes import router as address_router
+from app.api.v1.auth import router as auth_router
 from app.core.config import settings
 from app.core.exceptions import register_exception_handlers
 from app.core.logging import setup_logging
@@ -34,6 +35,7 @@ app = FastAPI(
 )
 
 app.add_middleware(RequestLoggingMiddleware)
+app.include_router(auth_router)
 app.include_router(address_router)
 register_exception_handlers(app)
 
